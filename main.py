@@ -3,6 +3,7 @@ from ChatExchange.chatexchange.client import Client
 from ChatExchange.chatexchange.events import MessagePosted
 import getpass
 import time
+import os
 
 room_number = int(raw_input("Room number: "))
 email = raw_input("Email: ")
@@ -24,9 +25,10 @@ def on_event(event, _):
 
 room.watch(on_event)
 
-with open("ApiKey.txt", "r") as f:
-    key = f.read().strip()
-    getedits.api_key = key
+if os.path.isfile("ApiKey.txt"):
+    with open("ApiKey.txt", "r") as f:
+        key = f.read().strip()
+        getedits.api_key = key
 
 
 def send_notification_to_room(msg, s_id):
