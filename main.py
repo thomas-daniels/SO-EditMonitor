@@ -38,6 +38,7 @@ getedits.get_se_fkey(c)
 while True:
     latest_edits = getedits.api_request()
     getedits.process_items(latest_edits)
+    print("New items in queue: %s" % (len(getedits.queue),))
     getedits.empty_queue(c)
     getedits.filter_saved_list()
     print("API quota: " + str(getedits.api_quota))
