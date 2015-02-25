@@ -23,7 +23,7 @@ def on_event(event, _):
     if event.message.content_source.startswith(">>apiquota"):
         event.message.reply(str(getedits.api_quota))
 
-room.watch(on_event)
+room.watch_socket(on_event)
 
 if os.path.isfile("ApiKey.txt"):
     with open("ApiKey.txt", "r") as f:
