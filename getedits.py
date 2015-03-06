@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import time
-import re
 
 api_key = ""
 api_url = "https://api.stackexchange.com/2.2/suggested-edits?order=desc&sort=creation&site=stackoverflow&pagesize=50&filter=!*Km*hwlf.lBeKxAb"
@@ -10,14 +9,6 @@ delay = 1.5
 reviewed_confirmed = []
 queue = []
 action_needed = None
-se_fkey = ""
-
-
-def get_se_fkey(client):  # use ChatExchange's Client and Browser objects to do this
-    global se_fkey
-    script_with_fkey = client._br.get_soup("http://stackoverflow.com/", None,
-                                           None, False).find_all("script")[3].getText()
-    se_fkey = re.compile("\"fkey\":\"([a-fA-F0-9]+)\"").search(script_with_fkey).group(1)
 
 
 def api_request():
@@ -32,13 +23,17 @@ def api_request():
     return items
 
 
-def get_review_data(client, s_id):  # use ChatExchange's Client and Browser objects to do this
+def get_review_data(s_id):
     req = requests.get("http://stackoverflow.com/suggested-edits/%s" % (s_id,),
                        allow_redirects=False)
     rev_loc = req.headers['Location']
     rev_id = int(rev_loc.split('/')[3])
-    rev_data = client._br.post("http://stackoverflow.com/review/next-task/%s" % (rev_id,),
-                               {"taskTypeId": 1, "fkey": se_fkey}, None, False).json()["instructions"]
+    req_params = {"taskTypeId": 1}
+    response = requests.post("http://stackoverflow.com/review/next-task/%s" % (rev_id,),
+                             params=req_params)
+    if response.status_code != 200:
+        raise Exception("API response status code is not 200.")
+    rev_data = response.json()["instructions"]
     return rev_data
 
 
@@ -50,14 +45,14 @@ def process_items(items):
             queue.append(suggested_edit_id)
 
 
-def empty_queue(client):
+def empty_queue():
     global reviewed_confirmed
     global queue
     if len(queue) == 0:
         return
     queue.reverse()
     for s_id in queue:
-        soup = BeautifulSoup(get_review_data(client, s_id))
+        soup = BeautifulSoup(get_review_data(s_id))
         result_containers = soup.find_all("div", class_="review-results")
         rejections = 0
         for rc in result_containers:
