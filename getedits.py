@@ -32,7 +32,7 @@ def get_review_data(s_id):
     response = requests.post("http://stackoverflow.com/review/next-task/%s" % (rev_id,),
                              params=req_params)
     if response.status_code != 200:
-        raise Exception("API response status code is not 200.")
+        raise Exception("Review data response status code is not 200.")
     rev_data = response.json()["instructions"]
     return rev_data
 
