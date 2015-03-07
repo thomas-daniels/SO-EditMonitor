@@ -1,4 +1,4 @@
-import getedits
+import editfetcher
 from ChatExchange.chatexchange.client import Client
 from ChatExchange.chatexchange.events import MessagePosted
 import getpass
@@ -21,26 +21,26 @@ def on_event(event, _):
     if not isinstance(event, MessagePosted):
         return
     if event.message.content_source.startswith(">>apiquota"):
-        event.message.reply(str(getedits.api_quota))
+        event.message.reply(str(editfetcher.api_quota))
 
 room.watch_socket(on_event)
 
 if os.path.isfile("ApiKey.txt"):
     with open("ApiKey.txt", "r") as f:
         key = f.read().strip()
-        getedits.api_key = key
+        editfetcher.api_key = key
 
 
 def send_notification_to_room(msg, s_id):
     room.send_message("[ EditMonitor ] %s: [%s](http://stackoverflow.com/suggested-edits/%s)"
                       % (msg, s_id, s_id))
 
-getedits.action_needed = send_notification_to_room
+editfetcher.action_needed = send_notification_to_room
 while True:
-    latest_edits = getedits.api_request()
-    getedits.process_items(latest_edits)
-    print("Queue length: %s" % (len(getedits.queue),))
-    getedits.empty_queue()
-    getedits.filter_saved_list()
-    print("API quota: " + str(getedits.api_quota))
+    latest_edits = editfetcher.api_request()
+    editfetcher.process_items(latest_edits)
+    print("Queue length: %s" % (len(editfetcher.queue),))
+    editfetcher.empty_queue()
+    editfetcher.filter_saved_list()
+    print("API quota: " + str(editfetcher.api_quota))
     time.sleep(150)
