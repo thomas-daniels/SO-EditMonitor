@@ -16,17 +16,26 @@ class EditFetcher:
         self.delay = 1.5
         self.reviewed_confirmed = []
         self.queue = []
-        self.action_needed = None
+        self.chat_send = None
+
+    @staticmethod
+    def format_edit_notification(msg, s_id):
+        return "%s: [%s](http://stackoverflow.com/suggested-edits/%s)" \
+               % (msg, s_id, s_id)
 
     def api_request(self):
         url = self.api_url
         if self.api_key != "":
             url = url + "&key=" + self.api_key
-        r = requests.get(url)
+        try:
+            r = requests.get(url)
+        except requests.ConnectionError:
+            self.chat_send("Recovered from ConnectionError during API request")
+            return False, []
         j = r.json()
         items = j["items"]
         self.api_quota = j["quota_remaining"]
-        return items
+        return True, items
 
     @staticmethod
     def get_review_data(s_id):
@@ -63,8 +72,12 @@ class EditFetcher:
                 vote = rc.find("b").getText().lower().strip()
                 if vote == "reject":
                     rejections += 1
-            if rejections >= 2 and self.action_needed is not None:
-                self.action_needed("Approved with 2 rejection votes", s_id)
+            if rejections >= 2 and self.chat_send is not None:
+                self.chat_send(
+                    EditFetcher.format_edit_notification(
+                        "Approved with 2 rejection votes", s_id
+                    )
+                )
             self.reviewed_confirmed.insert(0, s_id)
             time.sleep(self.delay)  # to avoid getting request-throttled
         del self.queue[:]  # clear the queue

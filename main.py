@@ -33,16 +33,16 @@ if os.path.isfile("ApiKey.txt"):
         fetcher.api_key = key
 
 
-def send_notification_to_room(msg, s_id):
-    room.send_message("[ EditMonitor ] %s: [%s](http://stackoverflow.com/suggested-edits/%s)"
-                      % (msg, s_id, s_id))
+def send_message_to_room(msg):
+    room.send_message("[ EditMonitor ] %s" % msg)
 
-fetcher.action_needed = send_notification_to_room
+fetcher.chat_send = send_message_to_room
 while True:
-    latest_edits = fetcher.api_request()
-    fetcher.process_items(latest_edits)
-    print("Queue length: %s" % (len(fetcher.queue),))
-    fetcher.empty_queue()
-    fetcher.filter_saved_list()
-    print("API quota: " + str(fetcher.api_quota))
+    success, latest_edits = fetcher.api_request()
+    if success:
+        fetcher.process_items(latest_edits)
+        print("Queue length: %s" % (len(fetcher.queue),))
+        fetcher.empty_queue()
+        fetcher.filter_saved_list()
+        print("API quota: " + str(fetcher.api_quota))
     time.sleep(150)
