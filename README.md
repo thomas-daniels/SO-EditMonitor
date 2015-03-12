@@ -6,3 +6,5 @@ EditMonitor uses the Stack Exchange API to get a list of the most recent edits. 
 Example chat post:
 
 ![Image of example chat post](https://i.imgur.com/qQDQ1wj.png)
+
+EditMonitor is licensed under the [CodeProject Open License v1.02](http://www.codeproject.com/info/cpol10.aspx). You can find a copy of this license in LICENSE.htm.
