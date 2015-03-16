@@ -4,6 +4,7 @@ from ChatExchange.chatexchange.events import MessagePosted
 import getpass
 import time
 import os
+import thread
 
 room_number = int(raw_input("Room number: "))
 email = raw_input("Email: ")
@@ -26,6 +27,10 @@ def on_event(event, _):
         return
     if event.message.content_source.startswith(">>apiquota"):
         event.message.reply(str(fetcher.api_quota))
+    elif event.message.content_source.startswith(">>stop"):
+        room.leave()
+        c.logout()
+        thread.interrupt_main()
 
 room.watch_socket(on_event)
 
