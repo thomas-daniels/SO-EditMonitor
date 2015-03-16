@@ -15,7 +15,7 @@ del password
 room = c.get_room(room_number)
 room.join()
 room.send_message(
-    "[EditMonitor](https://github.com/ProgramFOX/EditMonitor) started."
+    "[EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) started."
 )
 
 fetcher = EditFetcher()
@@ -37,7 +37,8 @@ if os.path.isfile("ApiKey.txt"):
 
 def send_message_to_room(msg):
     room.send_message(
-        "[ [EditMonitor](https://github.com/ProgramFOX/EditMonitor) ] %s" % msg
+        "[ [EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) ] %s"
+        % msg
     )
 
 fetcher.chat_send = send_message_to_room
