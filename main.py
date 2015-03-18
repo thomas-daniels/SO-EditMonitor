@@ -28,13 +28,13 @@ if os.path.isfile("owners.txt"):
     with open("owners.txt", "r") as f:
         owners = pickle.load(f)
 
-
+prefix = "!>"
 def on_event(event, _):
     if not isinstance(event, MessagePosted):
         return
-    if event.message.content_source.startswith(">>apiquota"):
+    if event.message.content_source.startswith(prefix + "apiquota"):
         event.message.reply(str(fetcher.api_quota))
-    elif event.message.content_source.startswith(">>stop")\
+    elif event.message.content_source.startswith(prefix + "stop")\
             and event.user.id in owners["host"]:
         room.leave()
         c.logout()
