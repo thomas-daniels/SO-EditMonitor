@@ -5,11 +5,13 @@ import getpass
 import time
 import os
 import thread
+import pickle
 
 room_number = int(raw_input("Room number: "))
 email = raw_input("Email: ")
 password = getpass.getpass()
-c = Client("stackoverflow.com")
+host = "stackoverflow.com"
+c = Client(host)
 c.login(email, password)
 del email
 del password
@@ -21,13 +23,19 @@ room.send_message(
 
 fetcher = EditFetcher()
 
+owners = []
+if os.path.isfile("owners.txt"):
+    with open("owners.txt", "r") as f:
+        owners = pickle.load(f)
+
 
 def on_event(event, _):
     if not isinstance(event, MessagePosted):
         return
     if event.message.content_source.startswith(">>apiquota"):
         event.message.reply(str(fetcher.api_quota))
-    elif event.message.content_source.startswith(">>stop"):
+    elif event.message.content_source.startswith(">>stop")\
+            and event.user.id in owners["host"]:
         room.leave()
         c.logout()
         thread.interrupt_main()
