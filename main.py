@@ -35,7 +35,7 @@ def on_event(event, _):
     if event.message.content_source.startswith(prefix + "apiquota"):
         event.message.reply(str(fetcher.api_quota))
     elif event.message.content_source.startswith(prefix + "stop")\
-            and event.user.id in owners["host"]:
+            and event.user.id in owners[host]:
         room.leave()
         c.logout()
         thread.interrupt_main()
