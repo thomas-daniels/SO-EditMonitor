@@ -2,10 +2,9 @@ from editfetcher import EditFetcher
 from ChatExchange.chatexchange.client import Client
 from ChatExchange.chatexchange.events import MessagePosted
 import getpass
-import time
 import os
-import thread
 import pickle
+import Queue
 
 room_number = int(raw_input("Room number: "))
 email = raw_input("Email: ")
@@ -29,6 +28,9 @@ if os.path.isfile("owners.txt"):
         owners = pickle.load(f)
 
 prefix = "!>"
+action_queue = Queue.Queue()
+
+
 def on_event(event, _):
     if not isinstance(event, MessagePosted):
         return
@@ -38,7 +40,8 @@ def on_event(event, _):
             and event.user.id in owners[host]:
         room.leave()
         c.logout()
-        thread.interrupt_main()
+        print("Exiting...")
+        action_queue.put_nowait(SystemExit)
 
 room.watch_socket(on_event)
 
@@ -55,7 +58,8 @@ def send_message_to_room(msg):
     )
 
 fetcher.chat_send = send_message_to_room
-while True:
+running = True
+while running:
     success, latest_edits = fetcher.api_request()
     if success:
         fetcher.process_items(latest_edits)
@@ -63,4 +67,9 @@ while True:
         fetcher.empty_queue()
         fetcher.filter_saved_list()
         print("API quota: " + str(fetcher.api_quota))
-    time.sleep(150)
+    try:
+        action = action_queue.get(True, 150)
+        if action == SystemExit:
+            running = False
+    except Queue.Empty:
+        pass
