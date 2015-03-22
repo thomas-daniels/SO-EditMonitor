@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import time
+import Queue
 
 
 class EditFetcher:
@@ -17,6 +18,8 @@ class EditFetcher:
         self.reviewed_confirmed = []
         self.queue = []
         self.chat_send = None
+        self.running = False
+        self.action_queue = Queue.Queue()
 
     @staticmethod
     def format_edit_notification(msg, s_id):
@@ -85,3 +88,23 @@ class EditFetcher:
     def filter_saved_list(self):
         if len(self.reviewed_confirmed) > 150:
             self.reviewed_confirmed = self.reviewed_confirmed[:150]
+
+    def do_work(self, delay):
+        self.running = True
+        while self.running:
+            success, latest_edits = self.api_request()
+            if success:
+                self.process_items(latest_edits)
+                print("Queue length: %s" % (len(self.queue),))
+                self.empty_queue()
+                self.filter_saved_list()
+                print("API quota: " + str(self.api_quota))
+            try:
+                action = self.action_queue.get(True, delay)
+                if action == SystemExit:
+                    self.running = False
+            except Queue.Empty:
+                pass
+
+    def stop(self):
+        self.action_queue.put_nowait(SystemExit)

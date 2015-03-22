@@ -41,7 +41,7 @@ def on_event(event, _):
         room.leave()
         c.logout()
         print("Exiting...")
-        action_queue.put_nowait(SystemExit)
+        fetcher.stop()
 
 room.watch_socket(on_event)
 
@@ -58,18 +58,4 @@ def send_message_to_room(msg):
     )
 
 fetcher.chat_send = send_message_to_room
-running = True
-while running:
-    success, latest_edits = fetcher.api_request()
-    if success:
-        fetcher.process_items(latest_edits)
-        print("Queue length: %s" % (len(fetcher.queue),))
-        fetcher.empty_queue()
-        fetcher.filter_saved_list()
-        print("API quota: " + str(fetcher.api_quota))
-    try:
-        action = action_queue.get(True, 150)
-        if action == SystemExit:
-            running = False
-    except Queue.Empty:
-        pass
+fetcher.do_work(150)
