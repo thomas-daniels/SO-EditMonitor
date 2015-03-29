@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import Queue
+import actions
 
 
 class EditFetcher:
@@ -101,10 +102,15 @@ class EditFetcher:
                 print("API quota: " + str(self.api_quota))
             try:
                 action = self.action_queue.get(True, delay)
-                if action == SystemExit:
+                if action == actions.EXIT:
                     self.running = False
+                elif action == actions.FORCE_CHECK:
+                    pass
             except Queue.Empty:
                 pass
 
     def stop(self):
-        self.action_queue.put_nowait(SystemExit)
+        self.action_queue.put_nowait(actions.EXIT)
+
+    def force_check(self):
+        self.action_queue.put_nowait(actions.FORCE_CHECK)

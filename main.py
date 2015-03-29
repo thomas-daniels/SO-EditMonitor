@@ -42,6 +42,9 @@ def on_event(event, _):
         c.logout()
         print("Exiting...")
         fetcher.stop()
+    elif event.message.content_source.startswith(prefix + "forcecheck")\
+            and event.user.id in owners[host]:
+        fetcher.force_check()
 
 room.watch_socket(on_event)
 
