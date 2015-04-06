@@ -70,6 +70,9 @@ def on_event(event, _):
             return
         if new_owner_host not in owners:
             owners[new_owner_host] = []
+        if new_owner_id in owners[new_owner_host]:
+            event.message.reply("User is already owner.")
+            return
         owners[new_owner_host].append(new_owner_id)
         with open("owners.txt", "w") as f:
             pickle.dump(owners, f)
