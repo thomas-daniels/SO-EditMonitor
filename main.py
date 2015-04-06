@@ -49,6 +49,10 @@ def on_event(event, _):
     elif msg.startswith(prefix + "addowner")\
             and event.user.id in owners[host]:
         args = msg.split(" ")[1:]
+        if len(args) != 2:
+            event.message.reply("2 arguments expected. "
+                                "Syntax: `!>addowner host id`")
+            return
         new_owner_host = args[0]
         new_owner_id_s = args[1]
         if not new_owner_host.endswith(".com"):
