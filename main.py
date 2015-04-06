@@ -67,6 +67,8 @@ def on_event(event, _):
         if new_owner_host not in owners:
             owners[new_owner_host] = []
         owners[new_owner_host].append(new_owner_id)
+        with open("owners.txt", "w") as f:
+            pickle.dump(owners, f)
         event.message.reply("New owner added")
     elif msg.startswith(prefix + "amiowner"):
         if event.user.id in owners[host]:
