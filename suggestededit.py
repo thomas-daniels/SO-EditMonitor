@@ -4,6 +4,7 @@ from user import User
 class SuggestedEdit:
     def __init__(self, json_data):
         self.suggested_edit_id = json_data["suggested_edit_id"]
+        self.summary = json_data["comment"]
         if "proposing_user" in json_data:
             self.proposing_user = User(json_data["proposing_user"])
         else:

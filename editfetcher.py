@@ -4,6 +4,7 @@ import time
 import Queue
 import actions
 from suggestededit import SuggestedEdit
+from checkspam import check_spam
 
 
 class EditFetcher:
@@ -14,7 +15,7 @@ class EditFetcher:
                        "&sort=creation" \
                        "&site=stackoverflow" \
                        "&pagesize=50" \
-                       "&filter=!*Km*ho)yKnkgFPNY"
+                       "&filter=!*Km*ho3zW5usnf9A"
         self.api_quota = 300
         self.delay = 1.5
         self.reviewed_confirmed = []
@@ -61,6 +62,16 @@ class EditFetcher:
     def process_items(self, items):
         for item in items:
             e = SuggestedEdit(item)
+            spam_reasons = check_spam(e.summary)
+            if e.suggested_edit_id not in self.reviewed_confirmed \
+                    and len(spam_reasons) > 0:
+                self.chat_send(
+                    EditFetcher.format_edit_notification(
+                        "Possible spam (%s)" % ", ".join(spam_reasons),
+                        e.suggested_edit_id
+                    )
+                )
+                self.reviewed_confirmed.append(e.suggested_edit_id)
             if e.approval_date != -1 \
                     and e.suggested_edit_id not in self.reviewed_confirmed:
                 self.queue.append(e)
