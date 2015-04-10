@@ -76,7 +76,7 @@ class EditFetcher:
                     and e.suggested_edit_id not in self.reviewed_confirmed:
                 self.queue.append(e)
 
-    def empty_queue(self, ):
+    def empty_queue(self):
         if len(self.queue) == 0:
             return
         self.queue.reverse()
