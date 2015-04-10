@@ -64,7 +64,7 @@ class EditFetcher:
             e = SuggestedEdit(item)
             spam_reasons = check_spam(e.summary)
             if e.suggested_edit_id not in self.reviewed_confirmed \
-                    and len(spam_reasons) > 0:
+                    and len(spam_reasons) > 0 and e.rejection_date == -1:
                 self.chat_send(
                     EditFetcher.format_edit_notification(
                         "Possible spam (%s)" % ", ".join(spam_reasons),
