@@ -25,9 +25,13 @@ class EditFetcher:
         self.action_queue = Queue.Queue()
 
     @staticmethod
-    def format_edit_notification(msg, s_id):
-        return "%s: [%s](http://stackoverflow.com/suggested-edits/%s)" \
-               % (msg, s_id, s_id)
+    def format_edit_notification(msg, s_id, additional):
+        if len(additional) == 0:
+            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s)" \
+                   % (msg, s_id, s_id)
+        else:
+            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s) | %s"\
+                   % (msg, s_id, s_id, " | ".join(additional))
 
     def api_request(self):
         url = self.api_url
@@ -68,7 +72,7 @@ class EditFetcher:
                 self.chat_send(
                     EditFetcher.format_edit_notification(
                         "Possible spam (%s)" % ", ".join(spam_reasons),
-                        e.suggested_edit_id
+                        e.suggested_edit_id, []
                     )
                 )
                 self.reviewed_confirmed.append(e.suggested_edit_id)
@@ -85,15 +89,22 @@ class EditFetcher:
             soup = BeautifulSoup(EditFetcher.get_review_data(s_id))
             result_containers = soup.find_all("div", class_="review-results")
             rejections = 0
+            additional = []
             for rc in result_containers:
                 vote = rc.find("b").getText().lower().strip()
+                is_owner = len(rc.find_all("a", class_="owner")) > 0
+                if is_owner:
+                    additional.append("Approved by OP")
                 if vote == "reject":
                     rejections += 1
+                elif vote == "edit":
+                    additional.append("Edited by reviewer")
             if rejections >= 2 and self.chat_send is not None \
                     and s_edit.proposing_user.user_type == "registered":
                 self.chat_send(
                     EditFetcher.format_edit_notification(
-                        "Approved with 2 rejection votes", s_id
+                        "Approved with 2 rejection votes", s_id,
+                        additional
                     )
                 )
             elif rejections >= 1 and self.chat_send is not None \
@@ -101,7 +112,7 @@ class EditFetcher:
                 self.chat_send(
                     EditFetcher.format_edit_notification(
                         "Edit by anonymous user approved "
-                        "with 1 (or more) rejection vote(s)", s_id
+                        "with 1 (or more) rejection vote(s)", s_id, []
                     )
                 )
             self.reviewed_confirmed.insert(0, s_id)
