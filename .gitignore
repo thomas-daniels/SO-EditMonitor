@@ -2,3 +2,4 @@
 *.pyc
 ApiKey.txt
 owners.txt
+__pycache__/
