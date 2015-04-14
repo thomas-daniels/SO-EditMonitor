@@ -75,7 +75,7 @@ class EditFetcher:
                         e.suggested_edit_id, []
                     )
                 )
-                self.reviewed_confirmed.append(e.suggested_edit_id)
+                self.reviewed_confirmed.insert(0, e.suggested_edit_id)
             if e.approval_date != -1 \
                     and e.suggested_edit_id not in self.reviewed_confirmed:
                 self.queue.append(e)
