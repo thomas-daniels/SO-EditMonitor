@@ -112,7 +112,8 @@ class EditFetcher:
                 self.chat_send(
                     EditFetcher.format_edit_notification(
                         "Edit by anonymous user approved "
-                        "with 1 (or more) rejection vote(s)", s_id, []
+                        "with 1 (or more) rejection vote(s)", s_id,
+                        additional
                     )
                 )
             self.reviewed_confirmed.insert(0, s_id)
