@@ -71,7 +71,7 @@ class EditFetcher:
                     and len(spam_reasons) > 0 and e.rejection_date == -1:
                 self.chat_send(
                     EditFetcher.format_edit_notification(
-                        "Possible spam (%s)" % ", ".join(spam_reasons),
+                        "Potentially bad edit (%s)" % ", ".join(spam_reasons),
                         e.suggested_edit_id, []
                     )
                 )
