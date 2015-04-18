@@ -93,8 +93,8 @@ def websocket_closed(_):
     room.join()
     room.send_message("[ EditMonitor ] Recovered from closed web socket.")
 
-room.watch_socket(on_event)
 c.on_websocket_closed = websocket_closed
+room.watch_socket(on_event)
 
 if os.path.isfile("ApiKey.txt"):
     with open("ApiKey.txt", "r") as f:
