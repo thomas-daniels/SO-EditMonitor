@@ -5,6 +5,7 @@ import getpass
 import os
 import pickle
 import Queue
+import websocket
 
 room_number = int(raw_input("Room number: "))
 email = raw_input("Email: ")
@@ -83,7 +84,17 @@ def on_event(event, _):
         else:
             event.message.reply("No, you are not an owner.")
 
+
+def websocket_closed(_):
+    try:
+        room.leave()
+    except websocket.WebSocketConnectionClosedException:
+        pass
+    room.join()
+    room.send_message("[ EditMonitor ] Recovered from closed web socket.")
+
 room.watch_socket(on_event)
+c.on_websocket_closed = websocket_closed
 
 if os.path.isfile("ApiKey.txt"):
     with open("ApiKey.txt", "r") as f:
