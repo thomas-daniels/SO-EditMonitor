@@ -6,10 +6,24 @@ import os
 import pickle
 import Queue
 import websocket
+import excepthook
+import sys
 
-room_number = int(raw_input("Room number: "))
-email = raw_input("Email: ")
-password = getpass.getpass()
+sys.excepthook = excepthook.uncaught_exception
+excepthook.install_thread_excepthook()
+
+if len(sys.argv) > 1:
+    room_number = int(sys.argv[1])
+else:
+    room_number = int(raw_input("Room number: "))
+if len(sys.argv) > 2:
+    email = sys.argv[2]
+else:
+    email = raw_input("Email: ")
+if len(sys.argv) > 3:
+    password = sys.argv[3]
+else:
+    password = getpass.getpass()
 host = "stackoverflow.com"
 c = Client(host)
 c.login(email, password)
