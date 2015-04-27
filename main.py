@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from editfetcher import EditFetcher
 from ChatExchange.chatexchange.client import Client
 from ChatExchange.chatexchange.events import MessagePosted
