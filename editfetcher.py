@@ -29,9 +29,8 @@ class EditFetcher:
 
     def get_se_fkey(self):  # use ChatExchange's objects to do this
         client = self.ce_client
-        script_with_fkey = client._br.get_soup("http://stackoverflow.com/",
-                           None, None, False).find_all("script")[3]\
-                                             .getText()
+        script_with_fkey = client._br.get("http://stackoverflow.com/", None,
+                                          None, False).text
         self.se_fkey = re.compile("\"fkey\":\"([a-fA-F0-9]+)\"")\
                          .search(script_with_fkey).group(1)
 
@@ -64,13 +63,6 @@ class EditFetcher:
                            allow_redirects=False)
         rev_loc = req.headers['Location']
         rev_id = int(rev_loc.split('/')[3])
-        req_params = {"taskTypeId": 1}
-        """response = requests.post("http://stackoverflow.com/review/next-task/%s"
-                                 % (rev_id,),
-                                 params=req_params)
-        if response.status_code != 200:
-            raise Exception("Review data response status code is not 200.")
-        rev_data = response.json()["instructions"]"""
         rev_data = self.ce_client._br.post(
             "http://stackoverflow.com/review/next-task/%s" % (rev_id,),
                                {"taskTypeId": 1, "fkey": self.se_fkey},
