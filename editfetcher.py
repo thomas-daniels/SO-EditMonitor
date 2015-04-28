@@ -5,6 +5,7 @@ import Queue
 import actions
 from suggestededit import SuggestedEdit
 from checkspam import check_spam
+import re
 
 
 class EditFetcher:
@@ -23,6 +24,16 @@ class EditFetcher:
         self.chat_send = None
         self.running = False
         self.action_queue = Queue.Queue()
+        self.se_fkey = ""
+        self.ce_client = None
+
+    def get_se_fkey(self):  # use ChatExchange's objects to do this
+        client = self.ce_client
+        script_with_fkey = client._br.get_soup("http://stackoverflow.com/",
+                           None, None, False).find_all("script")[3]\
+                                             .getText()
+        self.se_fkey = re.compile("\"fkey\":\"([a-fA-F0-9]+)\"")\
+                         .search(script_with_fkey).group(1)
 
     @staticmethod
     def format_edit_notification(msg, s_id, additional):
@@ -47,20 +58,25 @@ class EditFetcher:
         self.api_quota = j["quota_remaining"]
         return True, items
 
-    @staticmethod
-    def get_review_data(s_id):
+    def get_review_data(self, s_id):
         req = requests.get("http://stackoverflow.com/suggested-edits/%s"
                            % (s_id,),
                            allow_redirects=False)
         rev_loc = req.headers['Location']
         rev_id = int(rev_loc.split('/')[3])
         req_params = {"taskTypeId": 1}
-        response = requests.post("http://stackoverflow.com/review/next-task/%s"
+        """response = requests.post("http://stackoverflow.com/review/next-task/%s"
                                  % (rev_id,),
                                  params=req_params)
         if response.status_code != 200:
             raise Exception("Review data response status code is not 200.")
-        rev_data = response.json()["instructions"]
+        rev_data = response.json()["instructions"]"""
+        rev_data = self.ce_client._br.post(
+            "http://stackoverflow.com/review/next-task/%s" % (rev_id,),
+                               {"taskTypeId": 1, "fkey": self.se_fkey},
+            None, False).json()["instructions"]
+        with open("testing.txt", "a") as f:
+            f.write(rev_data)
         return rev_data
 
     def process_items(self, items):
@@ -86,7 +102,7 @@ class EditFetcher:
         self.queue.reverse()
         for s_edit in self.queue:
             s_id = s_edit.suggested_edit_id
-            soup = BeautifulSoup(EditFetcher.get_review_data(s_id))
+            soup = BeautifulSoup(self.get_review_data(s_id))
             result_containers = soup.find_all("div", class_="review-results")
             rejections = 0
             additional = []

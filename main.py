@@ -125,4 +125,6 @@ def send_message_to_room(msg):
     )
 
 fetcher.chat_send = send_message_to_room
+fetcher.ce_client = c
+fetcher.get_se_fkey()
 fetcher.do_work(150)
