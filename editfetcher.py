@@ -75,8 +75,6 @@ class EditFetcher:
             "http://stackoverflow.com/review/next-task/%s" % (rev_id,),
                                {"taskTypeId": 1, "fkey": self.se_fkey},
             None, False).json()["instructions"]
-        with open("testing.txt", "a") as f:
-            f.write(rev_data)
         return rev_data
 
     def process_items(self, items):
