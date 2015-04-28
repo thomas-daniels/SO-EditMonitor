@@ -6,6 +6,7 @@ import actions
 from suggestededit import SuggestedEdit
 from checkspam import check_spam
 import re
+import sys
 
 
 class EditFetcher:
@@ -137,9 +138,11 @@ class EditFetcher:
             if success:
                 self.process_items(latest_edits)
                 print("Queue length: %s" % (len(self.queue),))
+                sys.stdout.flush()
                 self.empty_queue()
                 self.filter_saved_list()
                 print("API quota: " + str(self.api_quota))
+                sys.stdout.flush()
             try:
                 action = self.action_queue.get(True, delay)
                 if action == actions.EXIT:

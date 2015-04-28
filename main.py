@@ -59,6 +59,7 @@ def on_event(event, _):
         room.leave()
         c.logout()
         print("Exiting...")
+        sys.stdout.flush()
         fetcher.stop()
     elif msg.startswith(prefix + "forcecheck")\
             and event.user.id in owners[host]:

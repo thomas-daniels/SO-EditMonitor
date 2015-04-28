@@ -13,6 +13,7 @@ def uncaught_exception(exctype, value, tb):
     logged_msg = exception_only + os.linesep + str(now) + " UTC" + os.linesep +\
         tr + os.linesep + os.linesep
     print(logged_msg)
+    sys.stdout.flush()
     with open("errorLogs.txt", "a") as f:
         f.write(logged_msg)
     os._exit(1)
