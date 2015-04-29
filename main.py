@@ -101,16 +101,6 @@ def on_event(event, _):
         else:
             event.message.reply("No, you are not an owner.")
 
-
-def websocket_closed(_):
-    try:
-        room.leave()
-    except websocket.WebSocketConnectionClosedException:
-        pass
-    room.join()
-    room.send_message("[ EditMonitor ] Recovered from closed web socket.")
-
-c.on_websocket_closed = websocket_closed
 room.watch_socket(on_event)
 
 if os.path.isfile("ApiKey.txt"):
