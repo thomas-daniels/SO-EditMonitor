@@ -50,8 +50,13 @@ class EditFetcher:
             url = url + "&key=" + self.api_key
         try:
             r = requests.get(url)
+            r.raise_for_status()
         except requests.ConnectionError:
             self.chat_send("Recovered from ConnectionError during API request")
+            return False, []
+        except requests.HTTPError, h:
+            self.chat_send("Recovered from HTTPError during API request: %s"
+                           % h.message)
             return False, []
         try:
             j = r.json()
