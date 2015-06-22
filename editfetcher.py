@@ -53,7 +53,13 @@ class EditFetcher:
         except requests.ConnectionError:
             self.chat_send("Recovered from ConnectionError during API request")
             return False, []
-        j = r.json()
+        try:
+            j = r.json()
+        except ValueError:
+            self.chat_send(
+                "Recovered from ValueError when parsing JSON response."
+            )
+            return False, []
         items = j["items"]
         self.api_quota = j["quota_remaining"]
         return True, items
