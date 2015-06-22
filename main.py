@@ -7,7 +7,6 @@ import getpass
 import os
 import pickle
 import Queue
-import websocket
 import excepthook
 import sys
 

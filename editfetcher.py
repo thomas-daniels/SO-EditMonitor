@@ -77,7 +77,7 @@ class EditFetcher:
         rev_id = int(rev_loc.split('/')[3])
         rev_data = self.ce_client._br.post(
             "http://stackoverflow.com/review/next-task/%s" % (rev_id,),
-                               {"taskTypeId": 1, "fkey": self.se_fkey},
+            {"taskTypeId": 1, "fkey": self.se_fkey},
             None, False).json()["instructions"]
         return rev_data
 
