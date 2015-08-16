@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="EditMonitor,websockets,client">
+    <meta name="description" content="Web client for EditMonitor, to check its status.">
+    <title>Web client for EditMonitor</title>
+    <script type="text/javascript">
+        function escape(unescaped) {
+            return unescaped.replace(/&/g, "&amp;")
+                            .replace(/</g, "&lt;")
+                            .replace(/>/g, "&gt;")
+                            .replace(/"/g, "&quot;");
+        }
+        window.onload = function () {
+            var verboseOutput = "";
+            var smallerOutput = "";
+            var showVerbose = false;
+
+            var ws = new WebSocket("ws://localhost:4001/");
+            ws.onmessage = function (msg) {
+                var logElem = document.getElementById("log");
+
+                var data = msg.data;
+                var verbose = data[0] == "-";
+                var message = data.substring(1);
+
+                verboseOutput = message + "<br>" + verboseOutput;
+                if (!verbose) {
+                    smallerOutput = message + "<br>" + smallerOutput;
+                }
+
+                if (showVerbose) {
+                    logElem.innerHTML = verboseOutput;
+                } else {
+                    logElem.innerHTML = smallerOutput;
+                }
+            };
+
+            document.getElementById("verboseChk").onclick = function () {
+                showVerbose = document.getElementById("verboseChk").checked;
+                var logElem = document.getElementById("log");
+                if (showVerbose) {
+                    logElem.innerHTML = verboseOutput;
+                } else {
+                    logElem.innerHTML = smallerOutput;
+                }
+            };
+        };
+    </script>
+</head>
+<body>
+    <h1>Web client for <a href="https://github.com/ProgramFOX/SO-EditMonitor">EditMonitor</a></h1>
+    <input type="checkbox" id="verboseChk"> Verbose output
+    <pre id="log"></pre>
+</body>
+</html>

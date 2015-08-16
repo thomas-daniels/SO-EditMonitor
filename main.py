@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+import excepthook
+import sys
+
+sys.excepthook = excepthook.uncaught_exception
+excepthook.install_thread_excepthook()
+
 from editfetcher import EditFetcher
 from ChatExchange.chatexchange.client import Client
 from ChatExchange.chatexchange.events import MessagePosted
@@ -7,11 +13,17 @@ import getpass
 import os
 import pickle
 import Queue
-import excepthook
-import sys
+import sendmsg
+import wsserver
 
-sys.excepthook = excepthook.uncaught_exception
-excepthook.install_thread_excepthook()
+wsserv = wsserver.WSServer()
+if "--enable-websocket-server" in sys.argv:
+    wsserv.start()
+    sendmsg.wsserv = wsserv
+    sys.argv.remove("--enable-websocket-server")
+if "--verbose" in sys.argv:
+    sendmsg.verbose_output = True
+    sys.argv.remove("--verbose")
 
 if len(sys.argv) > 1:
     room_number = int(sys.argv[1])
@@ -57,8 +69,7 @@ def on_event(event, _):
             and event.user.id in owners[host]:
         room.leave()
         c.logout()
-        print("Exiting...")
-        sys.stdout.flush()
+        sendmsg.send_to_console_and_ws("Exiting...")
         fetcher.stop()
     elif msg.startswith(prefix + "forcecheck")\
             and event.user.id in owners[host]:
@@ -108,11 +119,12 @@ if os.path.isfile("ApiKey.txt"):
         fetcher.api_key = key
 
 
-def send_message_to_room(msg):
+def send_message_to_room(msg, verbose=False):
     room.send_message(
         "[ [EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) ] %s"
         % msg
     )
+    sendmsg.send_to_console_and_ws(msg, verbose)
 
 fetcher.chat_send = send_message_to_room
 fetcher.ce_client = c
