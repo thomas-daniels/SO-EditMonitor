@@ -5,6 +5,43 @@
     <meta name="keywords" content="EditMonitor,websockets,client">
     <meta name="description" content="Web client for EditMonitor, to check its status.">
     <title>Web client for EditMonitor</title>
+    <style type="text/css">
+        span.tabheader {
+            padding: 5px;
+            border: 1px solid black;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+            span.tabheader:not(.selected) {
+                background-color: #dedede;
+            }
+
+            span.tabheader.selected {
+                background-color: white;
+            }
+
+        input#verboseChk {
+            margin: 10px 3px 10px 10px;
+        }
+
+        tr.rightAlignRow td {
+            text-align: right;
+        }
+
+        table, td, th {
+            border: 1px solid black;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td, th {
+            padding: 5px;
+            font-size: 1.1em;
+        }
+    </style>
     <script type="text/javascript">
         function escape(unescaped) {
             return unescaped.replace(/&/g, "&amp;")
@@ -12,6 +49,21 @@
                             .replace(/>/g, "&gt;")
                             .replace(/"/g, "&quot;");
         }
+
+        function process(msg) {
+            var qlMatch = /^\[[0-9: -]+\] Queue length: (\d+)$/i.exec(msg);
+            if (qlMatch !== null && qlMatch !== undefined) {
+                document.getElementById("queueLengthCell").innerHTML = qlMatch[1];
+                return;
+            }
+
+            var quotaMatch = /^\[[0-9: -]+\] API quota: (\d+)$/i.exec(msg);
+            if (quotaMatch !== null && quotaMatch !== undefined) {
+                document.getElementById("quotaCell").innerHTML = quotaMatch[1];
+                return;
+            }
+        }
+
         window.onload = function () {
             var verboseOutput = "";
             var smallerOutput = "";
@@ -24,7 +76,7 @@
                 var data = msg.data;
                 var verbose = data[0] == "-";
                 var message = data.substring(1);
-
+                process(message);
                 verboseOutput = message + "<br>" + verboseOutput;
                 if (!verbose) {
                     smallerOutput = message + "<br>" + smallerOutput;
@@ -46,12 +98,57 @@
                     logElem.innerHTML = smallerOutput;
                 }
             };
+
+            var tabheaders = document.getElementsByClassName("tabheader");
+            var tabs = [];
+            for (var i = 0; i < tabheaders.length; i++) {
+                var curr = tabheaders[i];
+                var currFor = curr.getAttribute("data-for");
+                tabs.push(currFor);
+                curr.onclick = function (e) {
+                    e = e || window.event;
+                    var elem = e.target || e.srcElem;
+                    var elemFor = elem.getAttribute("data-for");
+                    document.getElementById(elemFor).style.display = "block";
+                    elem.className = "tabheader selected";
+                    for (var i = 0; i < tabheaders.length; i++) {
+                        var currDataFor = tabheaders[i].getAttribute('data-for');
+                        if (currDataFor !== elemFor) {
+                            document.getElementById(currDataFor).style.display = "none";
+                            tabheaders[i].className = "tabheader";
+                        }
+                    }
+                };
+            }
         };
     </script>
 </head>
 <body>
     <h1>Web client for <a href="https://github.com/ProgramFOX/SO-EditMonitor">EditMonitor</a></h1>
-    <input type="checkbox" id="verboseChk"> Verbose output
-    <pre id="log"></pre>
+    <div>
+        <span class="tabheader selected" data-for="overviewtab">Overview</span>
+        <span class="tabheader" data-for="rawlogtab">Raw log</span>
+        <div class="tabpage" id="overviewtab">
+            <h2>Overview</h2>
+            <table>
+                <tr>
+                    <th>Queue length</th>
+                    <th>API quota</th>
+                </tr>
+                <tr class="rightAlignRow">
+                    <td id="queueLengthCell">?</td>
+                    <td id="quotaCell">?</td>
+                </tr>
+            </table>
+        </div>
+        <div class="tabpage" id="rawlogtab" style="display: none;">
+            <h2>Raw log</h2>
+            <span class="verboseChkSpan">
+                <input type="checkbox" id="verboseChk"> Verbose output
+            </span><br>
+            Timestamps are in UTC.
+            <pre id="log"></pre>
+        </div>
+    </div>
 </body>
 </html>
