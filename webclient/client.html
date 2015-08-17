@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -6,6 +6,17 @@
     <meta name="description" content="Web client for EditMonitor, to check its status.">
     <title>Web client for EditMonitor</title>
     <style type="text/css">
+        @font-face {
+            font-family: 'Myriad Pro Regular';
+            font-style: normal;
+            font-weight: normal;
+            src: url('../fonts/MYRIADPRO-REGULAR.woff') format('woff');
+        }
+
+        body {
+            font-family: 'Myriad Pro Regular', Verdana;
+        }
+
         span.tabheader {
             padding: 5px;
             border: 1px solid black;
@@ -62,6 +73,11 @@
                 document.getElementById("quotaCell").innerHTML = quotaMatch[1];
                 return;
             }
+
+            var reportsTable = document.getElementById("reportsTable");
+            var newRow = reportsTable.insertRow(0);
+            var newCell = newRow.insertCell(0);
+            newCell.innerHTML = msg.replace(/\[([0-9]+)\]\(([^)]+)\)/, "<a href='$2'>$1</a>");
         }
 
         window.onload = function () {
@@ -140,6 +156,8 @@
                     <td id="quotaCell">?</td>
                 </tr>
             </table>
+            <h2>Reports</h2>
+            <table id="reportsTable"></table>
         </div>
         <div class="tabpage" id="rawlogtab" style="display: none;">
             <h2>Raw log</h2>
