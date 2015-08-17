@@ -49,7 +49,7 @@
         }
 
         td, th {
-            padding: 5px;
+            padding: 8px;
             font-size: 1.1em;
         }
 
@@ -89,9 +89,12 @@
             }
 
             var reportsTable = document.getElementById("reportsTable");
-            var newRow = reportsTable.insertRow(0);
-            var newCell = newRow.insertCell(0);
-            newCell.innerHTML = msg.replace(/\[([0-9]+)\]\(([^)]+)\)/, "<a href='$2'>$1</a>");
+            var newRow = reportsTable.insertRow(1);
+            var dateCell = newRow.insertCell(0);
+            var contentCell = newRow.insertCell(1);
+            dateCell.innerHTML = /^\[([0-9 :-]+)\]/.exec(msg)[1];
+            msg = msg.replace(/^\[[0-9 :-]+\]/, "").trim();
+            contentCell.innerHTML = msg.replace(/\[([0-9]+)\]\(([^)]+)\)/, "<a href='$2'>$1</a>");
         }
 
         window.onload = function () {
@@ -173,7 +176,12 @@
                 </tr>
             </table>
             <h2>Reports</h2>
-            <table id="reportsTable"></table>
+            <table id="reportsTable">
+                <tr>
+                    <th class="orange1">Date</th>
+                    <th class="orange2">Report content</th>
+                </tr>
+            </table>
         </div>
         <div class="tabpage" id="rawlogtab" style="display: none;">
             <h2>Raw log</h2>
