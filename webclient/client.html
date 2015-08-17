@@ -52,6 +52,20 @@
             padding: 5px;
             font-size: 1.1em;
         }
+
+        .orange1 {
+            background-color: #DD6305;
+            color: white;
+        }
+
+        .orange2 {
+            background-color: #AD4B00;
+            color: white;
+        }
+
+        header {
+            color: #F24009;
+        }
     </style>
     <script type="text/javascript">
         function escape(unescaped) {
@@ -140,7 +154,9 @@
     </script>
 </head>
 <body>
-    <h1>Web client for <a href="https://github.com/ProgramFOX/SO-EditMonitor">EditMonitor</a></h1>
+    <header>
+        <h1>Web client for <a href="https://github.com/ProgramFOX/SO-EditMonitor">EditMonitor</a></h1>
+    </header>
     <div>
         <span class="tabheader selected" data-for="overviewtab">Overview</span>
         <span class="tabheader" data-for="rawlogtab">Raw log</span>
@@ -148,8 +164,8 @@
             <h2>Overview</h2>
             <table>
                 <tr>
-                    <th>Queue length</th>
-                    <th>API quota</th>
+                    <th class="orange1">Queue length</th>
+                    <th class="orange2">API quota</th>
                 </tr>
                 <tr class="rightAlignRow">
                     <td id="queueLengthCell">?</td>
