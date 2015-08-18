@@ -1,0 +1,22 @@
+import sys
+from datetime import datetime
+
+wsserv = None
+verbose_output = False
+logfilename = ""
+
+
+def send_to_console_and_ws(msg, verbose=False):
+    msg = "[" + datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") + "] " + msg
+    if verbose_output is True or \
+            (verbose_output is False and verbose is False):
+        print(msg)
+        sys.stdout.flush()
+    if wsserv is not None:
+        if verbose:
+            msg = "-" + msg
+        else:
+            msg = "+" + msg
+        wsserv.send_ws_message(msg)
+    with open(logfilename, "a") as logf:
+        logf.write(msg + '\n')

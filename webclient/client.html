@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="EditMonitor,websockets,client">
+    <meta name="description" content="Web client for EditMonitor, to check its status.">
+    <title>Web client for EditMonitor</title>
+    <link rel="stylesheet" href="client.css">
+    <script type="text/javascript" src="client.js"></script>
+</head>
+<body>
+    <header>
+        <div id="error"></div>
+        <h1>Web client for <a href="https://github.com/ProgramFOX/SO-EditMonitor">EditMonitor</a></h1>
+    </header>
+    <div>
+        <span class="tabheader selected" data-for="overviewtab">Overview</span>
+        <span class="tabheader" data-for="rawlogtab">Raw log</span>
+        <div class="tabpage" id="overviewtab">
+            <h2>Overview</h2>
+            <table>
+                <tr>
+                    <th class="orange1">Queue length</th>
+                    <th class="orange2">API quota</th>
+                </tr>
+                <tr class="rightAlignRow">
+                    <td id="queueLengthCell">?</td>
+                    <td id="quotaCell">?</td>
+                </tr>
+            </table>
+            <h2>Reports</h2>
+            <table id="reportsTable">
+                <tr>
+                    <th class="orange1">Date (UTC)</th>
+                    <th class="orange2">Report content</th>
+                </tr>
+            </table>
+        </div>
+        <div class="tabpage hidden" id="rawlogtab">
+            <h2>Raw log</h2>
+            <span class="verboseChkSpan">
+                <input type="checkbox" id="verboseChk"> Verbose output
+            </span><br>
+            Timestamps are in UTC.
+            <pre id="log"></pre>
+        </div>
+    </div>
+</body>
+</html>

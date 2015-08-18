@@ -6,7 +6,7 @@ import actions
 from suggestededit import SuggestedEdit
 from checkspam import check_spam
 import re
-import sys
+import sendmsg
 
 
 class EditFetcher:
@@ -102,6 +102,8 @@ class EditFetcher:
         if len(self.queue) == 0:
             return
         self.queue.reverse()
+        processed = 0
+        length = len(self.queue)
         for s_edit in self.queue:
             s_id = s_edit.suggested_edit_id
             soup = BeautifulSoup(self.get_review_data(s_id))
@@ -135,6 +137,10 @@ class EditFetcher:
                     )
                 )
             self.reviewed_confirmed.insert(0, s_id)
+            processed += 1
+            sendmsg.send_to_console_and_ws(
+                "Queue length: " + str(length - processed), True
+            )
             time.sleep(self.delay)  # to avoid getting request-throttled
         del self.queue[:]  # clear the queue
 
@@ -148,12 +154,14 @@ class EditFetcher:
             success, latest_edits = self.api_request()
             if success:
                 self.process_items(latest_edits)
-                print("Queue length: %s" % (len(self.queue),))
-                sys.stdout.flush()
+                sendmsg.send_to_console_and_ws(
+                    "API quota: " + str(self.api_quota)
+                )
+                sendmsg.send_to_console_and_ws(
+                    "Queue length: %s" % (len(self.queue),)
+                )
                 self.empty_queue()
                 self.filter_saved_list()
-                print("API quota: " + str(self.api_quota))
-                sys.stdout.flush()
             try:
                 action = self.action_queue.get(True, delay)
                 if action == actions.EXIT:
