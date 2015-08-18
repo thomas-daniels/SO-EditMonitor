@@ -15,6 +15,7 @@ import pickle
 import Queue
 import sendmsg
 import wsserver
+from datetime import datetime
 
 wsserv = wsserver.WSServer()
 if "--enable-websocket-server" in sys.argv:
@@ -24,6 +25,11 @@ if "--enable-websocket-server" in sys.argv:
 if "--verbose" in sys.argv:
     sendmsg.verbose_output = True
     sys.argv.remove("--verbose")
+
+if not os.path.isdir("logs"):
+    os.mkdir("logs")
+
+sendmsg.logfilename = "logs/log-" + datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S") + ".txt"
 
 if len(sys.argv) > 1:
     room_number = int(sys.argv[1])

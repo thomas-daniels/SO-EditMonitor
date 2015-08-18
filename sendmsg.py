@@ -3,6 +3,7 @@ from datetime import datetime
 
 wsserv = None
 verbose_output = False
+logfilename = ""
 
 
 def send_to_console_and_ws(msg, verbose=False):
@@ -17,3 +18,5 @@ def send_to_console_and_ws(msg, verbose=False):
         else:
             msg = "+" + msg
         wsserv.send_ws_message(msg)
+    with open(logfilename, "a") as logf:
+        logf.write(msg + '\n')
