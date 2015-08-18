@@ -154,8 +154,12 @@ class EditFetcher:
             success, latest_edits = self.api_request()
             if success:
                 self.process_items(latest_edits)
-                sendmsg.send_to_console_and_ws("API quota: " + str(self.api_quota))
-                sendmsg.send_to_console_and_ws("Queue length: %s" % (len(self.queue),))
+                sendmsg.send_to_console_and_ws(
+                    "API quota: " + str(self.api_quota)
+                )
+                sendmsg.send_to_console_and_ws(
+                    "Queue length: %s" % (len(self.queue),)
+                )
                 self.empty_queue()
                 self.filter_saved_list()
             try:
