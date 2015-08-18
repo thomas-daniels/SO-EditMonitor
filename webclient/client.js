@@ -72,12 +72,12 @@ window.onload = function () {
             e = e || window.event;
             var elem = e.target || e.srcElem;
             var elemFor = elem.getAttribute("data-for");
-            document.getElementById(elemFor).style.display = "block";
+            document.getElementById(elemFor).className = "tabpage";
             elem.className = "tabheader selected";
             for (var i = 0; i < tabheaders.length; i++) {
                 var currDataFor = tabheaders[i].getAttribute('data-for');
                 if (currDataFor !== elemFor) {
-                    document.getElementById(currDataFor).style.display = "none";
+                    document.getElementById(currDataFor).className = "tabpage hidden";
                     tabheaders[i].className = "tabheader";
                 }
             }

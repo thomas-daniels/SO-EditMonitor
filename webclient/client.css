@@ -51,3 +51,7 @@ td, th {
 header {
     color: #F24009;
 }
+
+.hidden {
+    display: none;
+}
