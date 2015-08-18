@@ -32,7 +32,9 @@ window.onload = function () {
     var smallerOutput = "";
     var showVerbose = false;
 
-    var ws = new WebSocket("ws://localhost:4001/");
+    var hostname = window.location.hostname;
+    hostname = hostname == "" ? "localhost" : hostname;
+    var ws = new WebSocket("ws://" + hostname + ":4001/");
     ws.onmessage = function (msg) {
         var logElem = document.getElementById("log");
 
