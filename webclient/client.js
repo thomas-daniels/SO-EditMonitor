@@ -52,6 +52,10 @@ window.onload = function () {
         }
     };
 
+    ws.onclose = function () {
+        document.getElementById("error").innerHTML = "Warning! Web socket connection closed -- try refreshing the page to restore connection.";
+    }
+
     document.getElementById("verboseChk").onclick = function () {
         showVerbose = document.getElementById("verboseChk").checked;
         var logElem = document.getElementById("log");
