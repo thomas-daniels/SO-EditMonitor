@@ -6,6 +6,7 @@ class WSServer:
     def __init__(self):
         self.serv = None
         self.clients = []
+        self.previous_messages = []
 
     def start(self):
         port = 4001
@@ -19,13 +20,15 @@ class WSServer:
     def send_ws_message(self, msg):
         if not self.is_enabled():
             return
+        self.previous_messages.append(msg)
         self.serv.send_message_to_all(msg)
 
     def is_enabled(self):
         return self.serv is not None
 
     def client_joined(self, client, server):
-        pass
+        for prev_msg in self.previous_messages:
+            server.send_message(client, prev_msg)
 
     def message_received(self, client, server):
         pass
