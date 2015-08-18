@@ -10,7 +10,7 @@ class WSServer:
 
     def start(self):
         port = 4001
-        self.serv = WebsocketServer(port)
+        self.serv = WebsocketServer(port, "0.0.0.0")
         self.serv.set_fn_new_client(self.client_joined)
         self.serv.set_fn_message_received(self.message_received)
         self.serv.set_fn_client_left(self.client_left)
