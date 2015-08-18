@@ -1,0 +1,53 @@
+body {
+    font-family: Verdana;
+}
+
+span.tabheader {
+    padding: 5px;
+    border: 1px solid black;
+    display: inline-block;
+    cursor: pointer;
+}
+
+    span.tabheader:not(.selected) {
+        background-color: #dedede;
+    }
+
+    span.tabheader.selected {
+        background-color: white;
+    }
+
+input#verboseChk {
+    margin: 10px 3px 10px 10px;
+}
+
+tr.rightAlignRow td {
+    text-align: right;
+}
+
+table, td, th {
+    border: 1px solid black;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 8px;
+    font-size: 1.1em;
+}
+
+.orange1 {
+    background-color: #DD6305;
+    color: white;
+}
+
+.orange2 {
+    background-color: #AD4B00;
+    color: white;
+}
+
+header {
+    color: #F24009;
+}
