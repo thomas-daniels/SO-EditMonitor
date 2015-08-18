@@ -29,7 +29,9 @@ if "--verbose" in sys.argv:
 if not os.path.isdir("logs"):
     os.mkdir("logs")
 
-sendmsg.logfilename = "logs/log-" + datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S") + ".txt"
+sendmsg.logfilename = "logs/log-" + \
+                      datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S") + \
+                      ".txt"
 
 if len(sys.argv) > 1:
     room_number = int(sys.argv[1])
@@ -108,8 +110,8 @@ def on_event(event, _):
             event.message.reply("User is already owner.")
             return
         owners[new_owner_host].append(new_owner_id)
-        with open("owners.txt", "w") as f:
-            pickle.dump(owners, f)
+        with open("owners.txt", "w") as fi:
+            pickle.dump(owners, fi)
         event.message.reply("New owner added")
     elif msg.startswith(prefix + "amiowner"):
         if event.user.id in owners[host]:
