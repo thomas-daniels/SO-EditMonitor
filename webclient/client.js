@@ -5,17 +5,29 @@ function escape(unescaped) {
                     .replace(/"/g, "&quot;");
 }
 
-function process(msg) {
+function process(msg, payload) {
+    if (typeof (payload) === "undefined") payload = null;
+
     var qlMatch = /^\[[0-9: -]+\] Queue length: (\d+)$/i.exec(msg);
     if (qlMatch !== null && qlMatch !== undefined) {
-        document.getElementById("queueLengthCell").innerHTML = qlMatch[1];
-        return;
+        if (payload === null) {
+            document.getElementById("queueLengthCell").innerHTML = qlMatch[1];
+            return;
+        } else {
+            payload.queue = parseInt(qlMatch[1], 10);
+            return payload;
+        }
     }
 
     var quotaMatch = /^\[[0-9: -]+\] API quota: (\d+)$/i.exec(msg);
     if (quotaMatch !== null && quotaMatch !== undefined) {
-        document.getElementById("quotaCell").innerHTML = quotaMatch[1];
-        return;
+        if (payload === null) {
+            document.getElementById("quotaCell").innerHTML = quotaMatch[1];
+            return;
+        } else {
+            payload.quota = parseInt(quotaMatch[1], 10);
+            return payload;
+        }
     }
 
     var reportsTable = document.getElementById("reportsTable");
@@ -25,6 +37,8 @@ function process(msg) {
     dateCell.innerHTML = /^\[([0-9 :-]+)\]/.exec(msg)[1];
     msg = msg.replace(/^\[[0-9 :-]+\]/, "").trim();
     contentCell.innerHTML = msg.replace(/\[([0-9]+)\]\(([^)]+)\)/, "<a href='$2'>$1</a>");
+
+    if (payload !== null) return payload;
 }
 
 window.onload = function () {
@@ -34,14 +48,31 @@ window.onload = function () {
 
     var hostname = window.location.hostname;
     hostname = hostname == "" ? "localhost" : hostname;
+    var isPayload = false;
+    var payload = { quota: -1, queue: -1 };
     var ws = new WebSocket("ws://" + hostname + ":4001/");
     ws.onmessage = function (msg) {
-        var logElem = document.getElementById("log");
-
         var data = msg.data;
         var verbose = data[0] == "-";
         var message = data.substring(1);
-        process(message);
+        if (data == "payload-start") {
+            isPayload = true;
+            return;
+        } else if (data == "payload-end") {
+            isPayload = false;
+            process("[0] Queue length: " + payload.queue.toString(), null);
+            process("[0] API quota: " + payload.quota.toString(), null);
+            return;
+        }
+
+        if (isPayload) {
+            payload = process(message, payload);
+        } else {
+            process(message, null);
+        }
+
+        var logElem = document.getElementById("log");
+
         verboseOutput = message + "<br>" + verboseOutput;
         if (!verbose) {
             smallerOutput = message + "<br>" + smallerOutput;

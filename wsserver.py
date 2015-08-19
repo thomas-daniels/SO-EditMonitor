@@ -27,8 +27,10 @@ class WSServer:
         return self.serv is not None
 
     def client_joined(self, client, server):
+        server.send_message(client, "payload-start")
         for prev_msg in self.previous_messages:
             server.send_message(client, prev_msg)
+        server.send_message(client, "payload-end")
 
     def message_received(self, client, server):
         pass
