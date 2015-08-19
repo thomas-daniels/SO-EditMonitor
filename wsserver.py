@@ -17,6 +17,10 @@ class WSServer:
         thr = Thread(target=lambda: self.serv.run_forever())
         thr.start()
 
+    def stop(self):
+        self.serv.shutdown()
+        self.serv.server_close()
+
     def send_ws_message(self, msg):
         if not self.is_enabled():
             return

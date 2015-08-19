@@ -79,6 +79,7 @@ def on_event(event, _):
         c.logout()
         sendmsg.send_to_console_and_ws("Exiting...")
         fetcher.stop()
+        wsserv.stop()
     elif msg.startswith(prefix + "forcecheck")\
             and event.user.id in owners[host]:
         fetcher.force_check()
