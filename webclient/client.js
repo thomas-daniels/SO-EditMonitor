@@ -1,10 +1,3 @@
-function escape(unescaped) {
-    return unescaped.replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;");
-}
-
 function process(msg, data) {
     var isVerbose = msg[0] === "-";
     msg = msg.substring(1);
