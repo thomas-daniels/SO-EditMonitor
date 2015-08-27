@@ -8,8 +8,8 @@ function escape(unescaped) {
 function process(msg, data) {
     var isVerbose = msg[0] === "-";
     msg = msg.substring(1);
-    if (isVerbose) data.verboseLog.unshift(msg);
-    else data.smallerLog.unshift(msg);
+    data.verboseLog.unshift(msg);
+    if (!isVerbose) data.smallerLog.unshift(msg);
 
     var qlMatch = /^\[[0-9: -]+\] Queue length: (\d+)$/i.exec(msg);
     if (qlMatch !== null && qlMatch !== undefined) {
