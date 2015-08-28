@@ -56,16 +56,16 @@ function updateDom(newQueueLength, newQuota, newReports, newVerboseLogData, newS
 window.onload = function () {
     document.getElementById("verboseChk").checked = false;
     var hostname = window.location.hostname;
-    hostname = hostname == "" ? "localhost" : hostname;
+    hostname = hostname === "" ? "localhost" : hostname;
     var isPayload = false;
     var ws = new WebSocket("ws://" + hostname + ":4001/");
     var data = { queue: -1, quota: -1, reports: [], verboseLog: [], smallerLog: [] };
     ws.onmessage = function (msg) {
         var message = msg.data;
-        if (message == "payload-start") {
+        if (message === "payload-start") {
             isPayload = true;
             return;
-        } else if (message == "payload-end") {
+        } else if (message === "payload-end") {
             isPayload = false;
             updateDom(data.queue, data.quota, data.reports, data.verboseLog, data.smallerLog);
             data = { queue: -1, quota: -1, reports: [], verboseLog: [], smallerLog: [] };
