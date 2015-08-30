@@ -22,7 +22,7 @@ class EditFetcher:
         self.delay = 1.5
         self.reviewed_confirmed = []
         self.queue = []
-        self.chat_send = None
+        self.chat_send = lambda x: None
         self.running = False
         self.action_queue = Queue.Queue()
         self.se_fkey = ""
