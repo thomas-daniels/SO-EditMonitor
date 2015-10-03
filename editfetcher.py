@@ -27,6 +27,7 @@ class EditFetcher:
         self.action_queue = Queue.Queue()
         self.se_fkey = ""
         self.ce_client = None
+        self.restricted_mode = None
 
     def get_se_fkey(self):  # use ChatExchange's objects to do this
         client = self.ce_client
@@ -119,20 +120,18 @@ class EditFetcher:
                     rejections += 1
                 elif vote == "edit":
                     additional.append("Edited by reviewer")
+            rejection_reasons_soup = soup.find_all("div", class_="rejection-reason")
+            rejection_reasons_comply_to_mode = False
+            for rrs in rejection_reasons_soup:
+                reason = rrs.getText().strip()
+                if self.restricted_mode.should_report(reason):
+                    rejection_reasons_comply_to_mode = True
+                    break
             if rejections >= 2 and self.chat_send is not None \
-                    and s_edit.proposing_user.user_type == "registered":
+                    and rejection_reasons_comply_to_mode:
                 self.chat_send(
                     EditFetcher.format_edit_notification(
-                        "Approved with 2 rejection votes", s_id,
-                        additional
-                    )
-                )
-            elif rejections >= 1 and self.chat_send is not None \
-                    and s_edit.proposing_user.user_type != "registered":
-                self.chat_send(
-                    EditFetcher.format_edit_notification(
-                        "Edit by anonymous user approved "
-                        "with 1 (or more) rejection vote(s)", s_id,
+                        "Approved with 2 rejection votes (mode: {})".format(self.restricted_mode.mode), s_id,
                         additional
                     )
                 )

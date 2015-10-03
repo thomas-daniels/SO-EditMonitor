@@ -2,6 +2,7 @@
 *.pyc
 ApiKey.txt
 owners.txt
+mode.txt
 __pycache__/
 errorLogs.txt
 logs/

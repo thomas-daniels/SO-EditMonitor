@@ -16,6 +16,7 @@ import Queue
 import sendmsg
 import wsserver
 from datetime import datetime
+from restrictedmode import RestrictedMode
 
 wsserv = wsserver.WSServer()
 if "--enable-websocket-server" in sys.argv:
@@ -62,6 +63,10 @@ owners = []
 if os.path.isfile("owners.txt"):
     with open("owners.txt", "r") as f:
         owners = pickle.load(f)
+mode = 63
+if os.path.isfile("mode.txt"):
+    with open("mode.txt", "r") as f:
+        mode = int(f.read().strip())
 
 prefix = "!>"
 action_queue = Queue.Queue()
@@ -119,6 +124,28 @@ def on_event(event, _):
             event.message.reply("Yes, you are an owner.")
         else:
             event.message.reply("No, you are not an owner.")
+    elif msg.startswith(prefix + "mode") and event.user.id in owners[host]:
+        args = msg.strip().split(" ")[1:]
+        if len(args) == 0:
+            event.message.reply(
+                "Mode for 'Approved with 2 rejection votes': **{}**".format(fetcher.restricted_mode.mode)
+            )
+        elif len(args) == 1:
+            new_mode = args[0]
+            if not new_mode.isdigit():
+                event.message.reply("Invalid mode.")
+                return
+            new_mode_int = int(new_mode)
+            if new_mode_int > 63:
+                event.message.reply("Mode cannot be greater than 63.")
+                return
+            fetcher.restricted_mode = RestrictedMode(new_mode_int)
+            with open("mode.txt", "w+") as mode_file:
+                mode_file.write(str(new_mode_int))
+            event.message.reply("Mode set to {}. The enabled rejection reasons are: {}."
+                                .format(
+                                    fetcher.restricted_mode.mode, ", ".join(fetcher.restricted_mode.enabled_reasons)
+                                ))
 
 room.watch_socket(on_event)
 
@@ -137,5 +164,6 @@ def send_message_to_room(msg, verbose=False):
 
 fetcher.chat_send = send_message_to_room
 fetcher.ce_client = c
+fetcher.restricted_mode = RestrictedMode(mode)
 fetcher.get_se_fkey()
 fetcher.do_work(150)
