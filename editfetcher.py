@@ -95,8 +95,7 @@ class EditFetcher:
                     )
                 )
                 self.reviewed_confirmed.insert(0, e.suggested_edit_id)
-            if e.approval_date != -1 \
-                    and e.suggested_edit_id not in self.reviewed_confirmed:
+            if e.suggested_edit_id not in self.reviewed_confirmed and e.rejection_date == -1:
                 self.queue.append(e)
 
     def empty_queue(self):
@@ -110,6 +109,7 @@ class EditFetcher:
             soup = BeautifulSoup(self.get_review_data(s_id))
             result_containers = soup.find_all("div", class_="review-results")
             rejections = 0
+            approvals = 0
             additional = []
             for rc in result_containers:
                 vote = rc.find("b").getText().lower().strip()
@@ -120,6 +120,8 @@ class EditFetcher:
                     rejections += 1
                 elif vote == "edit":
                     additional.append("Edited by reviewer")
+                elif vote == "approve":
+                    approvals += 1
             rejection_reasons_soup = soup.find_all("div", class_="rejection-reason")
             rejection_reasons_comply_to_mode = False
             for rrs in rejection_reasons_soup:
@@ -128,14 +130,21 @@ class EditFetcher:
                     rejection_reasons_comply_to_mode = True
                     break
             if rejections >= 2 and self.chat_send is not None \
-                    and rejection_reasons_comply_to_mode:
+                    and rejection_reasons_comply_to_mode \
+                    and (s_edit.approval_date != -1 or approvals >= 2):
                 self.chat_send(
                     EditFetcher.format_edit_notification(
-                        "Approved with 2 rejection votes (mode: {})".format(self.restricted_mode.mode), s_id,
+                        "{} 2 rejection votes (mode: {})".format(
+                            "Approved with" if s_edit.approval_date != -1 else "In the queue with 2 approval votes and",
+                            self.restricted_mode.mode
+                        ),
+                        s_id,
                         additional
                     )
                 )
-            self.reviewed_confirmed.insert(0, s_id)
+                self.reviewed_confirmed.insert(0, s_id)
+            if s_edit.approval_date != -1 and s_id not in self.reviewed_confirmed:
+                self.reviewed_confirmed.insert(0, s_id)
             processed += 1
             sendmsg.send_to_console_and_ws(
                 "Queue length: " + str(length - processed), True
