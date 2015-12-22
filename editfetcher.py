@@ -7,6 +7,8 @@ from suggestededit import SuggestedEdit
 from checkspam import check_spam
 import re
 import sendmsg
+import rejectionreasons
+from collections import Counter
 
 
 class EditFetcher:
@@ -37,13 +39,14 @@ class EditFetcher:
                          .search(script_with_fkey).group(1)
 
     @staticmethod
-    def format_edit_notification(msg, s_id, additional):
+    def format_edit_notification(msg, s_id, additional, tooltip=""):
         if len(additional) == 0:
-            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s)" \
-                   % (msg, s_id, s_id)
+            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s%s)" \
+                   % (msg, s_id, s_id, ' "' + tooltip + '"' if tooltip != "" and tooltip is not None else "")
         else:
-            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s) | %s"\
-                   % (msg, s_id, s_id, " | ".join(additional))
+            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s%s) | %s"\
+                   % (msg, s_id, s_id, ' "' + tooltip + '"' if tooltip != "" and tooltip is not None else "",
+                      " | ".join(additional))
 
     def api_request(self):
         url = self.api_url
@@ -124,14 +127,21 @@ class EditFetcher:
                     approvals += 1
             rejection_reasons_soup = soup.find_all("div", class_="rejection-reason")
             rejection_reasons_comply_to_mode = False
+            reason_types = []
             for rrs in rejection_reasons_soup:
                 reason = rrs.getText().strip()
+                reason_types.append(rejectionreasons.get_reason_type(reason))
                 if self.restricted_mode.should_report(reason):
                     rejection_reasons_comply_to_mode = True
                     break
             if rejections >= 2 and self.chat_send is not None \
                     and rejection_reasons_comply_to_mode \
                     and (s_edit.approval_date != -1 or approvals >= 2):
+                count = Counter(reason_types)
+                tooltip = "rejection votes: "
+                for k in count:
+                    tooltip += "{} x {}, ".format(count[k], k)
+                tooltip = tooltip.rstrip().rstrip(',')
                 self.chat_send(
                     EditFetcher.format_edit_notification(
                         "{} 2 rejection votes (mode: {})".format(
@@ -139,7 +149,8 @@ class EditFetcher:
                             self.restricted_mode.mode
                         ),
                         s_id,
-                        additional
+                        additional,
+                        tooltip
                     )
                 )
                 self.reviewed_confirmed.insert(0, s_id)
