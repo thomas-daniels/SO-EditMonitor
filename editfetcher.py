@@ -133,7 +133,6 @@ class EditFetcher:
                 reason_types.append(rejectionreasons.get_reason_type(reason))
                 if self.restricted_mode.should_report(reason):
                     rejection_reasons_comply_to_mode = True
-                    break
             if rejections >= 2 and self.chat_send is not None \
                     and rejection_reasons_comply_to_mode \
                     and (s_edit.approval_date != -1 or approvals >= 2):
