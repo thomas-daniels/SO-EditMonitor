@@ -77,6 +77,8 @@ class EditFetcher:
         req = requests.get("http://stackoverflow.com/suggested-edits/%s"
                            % (s_id,),
                            allow_redirects=False)
+        if 'Location' not in req.headers:
+            return None
         rev_loc = req.headers['Location']
         rev_id = int(rev_loc.split('/')[3])
         rev_data = self.ce_client._br.post(
@@ -109,7 +111,10 @@ class EditFetcher:
         length = len(self.queue)
         for s_edit in self.queue:
             s_id = s_edit.suggested_edit_id
-            soup = BeautifulSoup(self.get_review_data(s_id))
+            rev_data = self.get_review_data(s_id)
+            if rev_data is None:
+                continue
+            soup = BeautifulSoup(rev_data)
             result_containers = soup.find_all("div", class_="review-results")
             rejections = 0
             approvals = 0
