@@ -19,8 +19,10 @@ from datetime import datetime
 from restrictedmode import RestrictedMode
 
 wsserv = wsserver.WSServer()
+wsserv_enabled = False
 if "--enable-websocket-server" in sys.argv:
     wsserv.start()
+    wsserv_enabled = True
     sendmsg.wsserv = wsserv
     sys.argv.remove("--enable-websocket-server")
 if "--verbose" in sys.argv:
@@ -84,7 +86,8 @@ def on_event(event, _):
         c.logout()
         sendmsg.send_to_console_and_ws("Exiting...")
         fetcher.stop()
-        wsserv.stop()
+        if wsserv_enabled:
+            wsserv.stop()
     elif msg.startswith(prefix + "forcecheck")\
             and event.user.id in owners[host]:
         fetcher.force_check()
