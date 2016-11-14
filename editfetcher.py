@@ -81,10 +81,15 @@ class EditFetcher:
             return None
         rev_loc = req.headers['Location']
         rev_id = int(rev_loc.split('/')[3])
-        rev_data = self.ce_client._br.post(
-            "http://stackoverflow.com/review/next-task/%s" % (rev_id,),
-            {"taskTypeId": 1, "fkey": self.se_fkey},
-            None, False).json()["instructions"]
+        rev_data = None
+        try:
+            rev_data = self.ce_client._br.post(
+                "http://stackoverflow.com/review/next-task/%s" % (rev_id,),
+                {"taskTypeId": 1, "fkey": self.se_fkey},
+                None, False).json()["instructions"]
+        except requests.HTTPError, h:
+            self.chat_send("Recovered from HTTPError while fetching review task: %s"
+                           % h.message)
         return rev_data
 
     def process_items(self, items):
