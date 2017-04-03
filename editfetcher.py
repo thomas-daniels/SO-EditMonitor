@@ -56,16 +56,16 @@ class EditFetcher:
             r = requests.get(url)
             r.raise_for_status()
         except requests.ConnectionError:
-            self.chat_send("Recovered from ConnectionError during API request")
+            self.log_error("Recovered from ConnectionError during API request")
             return False, []
         except requests.HTTPError, h:
-            self.chat_send("Recovered from HTTPError during API request: %s"
+            self.log_error("Recovered from HTTPError during API request: %s"
                            % h.message)
             return False, []
         try:
             j = r.json()
         except ValueError:
-            self.chat_send(
+            self.log_error(
                 "Recovered from ValueError when parsing JSON response."
             )
             return False, []
@@ -88,7 +88,7 @@ class EditFetcher:
                 {"taskTypeId": 1, "fkey": self.se_fkey},
                 None, False).json()["instructions"]
         except requests.HTTPError, h:
-            self.chat_send("Recovered from HTTPError while fetching review task: %s"
+            self.log_error("Recovered from HTTPError while fetching review task: %s"
                            % h.message)
         return rev_data
 
@@ -204,3 +204,7 @@ class EditFetcher:
 
     def force_check(self):
         self.action_queue.put_nowait(actions.FORCE_CHECK)
+
+    def log_error(self, msg):
+        with open("errorLogs.txt", "a") as f:
+            f.write("\nError from editfetcher.py: " + msg + "\n")
