@@ -143,9 +143,9 @@ class EditFetcher:
                 reason_types.append(rejectionreasons.get_reason_type(reason))
                 if self.restricted_mode.should_report(reason):
                     rejection_reasons_comply_to_mode = True
-            if rejections >= 2 and self.chat_send is not None \
+            if rejections >= 1 and self.chat_send is not None \
                     and rejection_reasons_comply_to_mode \
-                    and (s_edit.approval_date != -1 or approvals >= 2):
+                    and (s_edit.approval_date != -1 or approvals >= 1):
                 count = Counter(reason_types)
                 tooltip = "rejection votes: "
                 for k in count:
@@ -153,8 +153,8 @@ class EditFetcher:
                 tooltip = tooltip.rstrip().rstrip(',')
                 self.chat_send(
                     EditFetcher.format_edit_notification(
-                        "{} 2 rejection votes (mode: {})".format(
-                            "Approved with" if s_edit.approval_date != -1 else "In the queue with 2 approval votes and",
+                        "{} 1 rejection vote (mode: {})".format(
+                            "Approved with" if s_edit.approval_date != -1 else "In the queue with 1 approval vote and",
                             self.restricted_mode.mode
                         ),
                         s_id,
