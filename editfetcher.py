@@ -25,6 +25,7 @@ class EditFetcher:
         self.reviewed_confirmed = []
         self.queue = []
         self.chat_send = lambda x: None
+        self.chat_send_secondary = lambda x: None
         self.running = False
         self.action_queue = Queue.Queue()
         self.se_fkey = ""
@@ -151,7 +152,7 @@ class EditFetcher:
                 for k in count:
                     tooltip += "{} x {}, ".format(count[k], k)
                 tooltip = tooltip.rstrip().rstrip(',')
-                self.chat_send(
+                self.chat_send_secondary(
                     EditFetcher.format_edit_notification(
                         "{} 1 rejection vote (mode: {})".format(
                             "Approved with" if s_edit.approval_date != -1 else "In the queue with 1 approval vote and",

@@ -48,6 +48,10 @@ if len(sys.argv) > 3:
     password = sys.argv[3]
 else:
     password = getpass.getpass()
+if len(sys.argv) > 4:
+    secondary_room_number = sys.argv[4]
+else:
+    secondary_room_number = int(raw_input("Secondary room (0 to disable): "))
 host = "stackoverflow.com"
 c = Client(host)
 c.login(email, password)
@@ -58,6 +62,15 @@ room.join()
 room.send_message(
     "[EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) started."
 )
+
+if secondary_room_number != 0:
+    secondary_room = c.get_room(secondary_room_number)
+    secondary_room.join()
+    secondary_room.send_message(
+        "[EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) started. (Note: this is the secondary room so I don't listen for commands here."
+    )
+else:
+    secondary_room = None
 
 fetcher = EditFetcher()
 
@@ -165,7 +178,16 @@ def send_message_to_room(msg, verbose=False):
     )
     sendmsg.send_to_console_and_ws(msg, verbose)
 
+
+def send_message_to_secondary_room(msg, verbose=False):
+    secondary_room.send_message(
+        "[ [EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) ] %s"
+        % msg
+    )
+    sendmsg.send_to_console_and_ws(msg, verbose)
+
 fetcher.chat_send = send_message_to_room
+fetcher.chat_send_secondary = send_message_to_secondary_room if secondary_room is not None else lambda x: None
 fetcher.ce_client = c
 fetcher.restricted_mode = RestrictedMode(mode)
 fetcher.get_se_fkey()
