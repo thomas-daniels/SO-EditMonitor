@@ -67,7 +67,7 @@ if secondary_room_number != 0:
     secondary_room = c.get_room(secondary_room_number)
     secondary_room.join()
     secondary_room.send_message(
-        "[EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) started. (Note: this is the secondary room so I don't listen for commands here."
+        "[EditMonitor](https://github.com/ProgramFOX/SO-EditMonitor) started. (Note: this is the secondary room so I don't listen for commands here.)"
     )
 else:
     secondary_room = None
