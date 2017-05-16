@@ -144,7 +144,7 @@ class EditFetcher:
                 reason_types.append(rejectionreasons.get_reason_type(reason))
                 if self.restricted_mode.should_report(reason):
                     rejection_reasons_comply_to_mode = True
-            if rejections >= 1 and self.chat_send is not None \
+            if rejections >= 1 and self.chat_send_secondary is not None \
                     and rejection_reasons_comply_to_mode \
                     and (s_edit.approval_date != -1 or approvals >= 1):
                 count = Counter(reason_types)
