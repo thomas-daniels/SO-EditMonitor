@@ -1,10 +1,14 @@
 import requests
+from bs4 import BeautifulSoup
+import time
 import Queue
 import actions
 from suggestededit import SuggestedEdit
 from checkspam import check_spam
 import re
 import sendmsg
+import rejectionreasons
+from collections import Counter
 
 
 class EditFetcher:
@@ -19,6 +23,7 @@ class EditFetcher:
         self.api_quota = 300
         self.delay = 1.5
         self.reviewed_confirmed = []
+        self.queue = []
         self.chat_send = lambda x: None
         self.running = False
         self.action_queue = Queue.Queue()
@@ -100,6 +105,72 @@ class EditFetcher:
                     )
                 )
                 self.reviewed_confirmed.insert(0, e.suggested_edit_id)
+            if e.suggested_edit_id not in self.reviewed_confirmed and e.rejection_date == -1:
+                self.queue.append(e)
+
+    def empty_queue(self):
+        if len(self.queue) == 0:
+            return
+        self.queue.reverse()
+        processed = 0
+        length = len(self.queue)
+        for s_edit in self.queue:
+            s_id = s_edit.suggested_edit_id
+            rev_data = self.get_review_data(s_id)
+            if rev_data is None:
+                continue
+            soup = BeautifulSoup(rev_data)
+            result_containers = soup.find_all("div", class_="review-results")
+            rejections = 0
+            approvals = 0
+            additional = []
+            for rc in result_containers:
+                vote = rc.find("b").getText().lower().strip()
+                is_owner = len(rc.find_all("a", class_="owner")) > 0
+                if is_owner:
+                    additional.append("Approved by OP")
+                if vote == "reject":
+                    rejections += 1
+                elif vote == "edit":
+                    additional.append("Edited by reviewer")
+                elif vote == "approve":
+                    approvals += 1
+            rejection_reasons_soup = soup.find_all("div", class_="rejection-reason")
+            rejection_reasons_comply_to_mode = False
+            reason_types = []
+            for rrs in rejection_reasons_soup:
+                reason = rrs.getText().strip()
+                reason_types.append(rejectionreasons.get_reason_type(reason))
+                if self.restricted_mode.should_report(reason):
+                    rejection_reasons_comply_to_mode = True
+            if rejections >= 1 and self.chat_send is not None \
+                    and rejection_reasons_comply_to_mode \
+                    and (s_edit.approval_date != -1 or approvals >= 1):
+                count = Counter(reason_types)
+                tooltip = "rejection votes: "
+                for k in count:
+                    tooltip += "{} x {}, ".format(count[k], k)
+                tooltip = tooltip.rstrip().rstrip(',')
+                self.chat_send(
+                    EditFetcher.format_edit_notification(
+                        "{} 1 rejection vote (mode: {})".format(
+                            "Approved with" if s_edit.approval_date != -1 else "In the queue with 1 approval vote and",
+                            self.restricted_mode.mode
+                        ),
+                        s_id,
+                        additional,
+                        tooltip
+                    )
+                )
+                self.reviewed_confirmed.insert(0, s_id)
+            if s_edit.approval_date != -1 and s_id not in self.reviewed_confirmed:
+                self.reviewed_confirmed.insert(0, s_id)
+            processed += 1
+            sendmsg.send_to_console_and_ws(
+                "Queue length: " + str(length - processed), True
+            )
+            time.sleep(self.delay)  # to avoid getting request-throttled
+        del self.queue[:]  # clear the queue
 
     def filter_saved_list(self):
         if len(self.reviewed_confirmed) > 150:
@@ -114,6 +185,10 @@ class EditFetcher:
                 sendmsg.send_to_console_and_ws(
                     "API quota: " + str(self.api_quota)
                 )
+                sendmsg.send_to_console_and_ws(
+                    "Queue length: %s" % (len(self.queue),)
+                )
+                self.empty_queue()
                 self.filter_saved_list()
             try:
                 action = self.action_queue.get(True, delay)
