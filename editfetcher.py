@@ -34,7 +34,7 @@ class EditFetcher:
 
     def get_se_fkey(self):  # use ChatExchange's objects to do this
         client = self.ce_client
-        script_with_fkey = client._br.get("http://stackoverflow.com/", None,
+        script_with_fkey = client._br.get("https://stackoverflow.com/", None,
                                           None, False).text
         self.se_fkey = re.compile("\"fkey\":\"([a-fA-F0-9]+)\"")\
                          .search(script_with_fkey).group(1)
@@ -42,10 +42,10 @@ class EditFetcher:
     @staticmethod
     def format_edit_notification(msg, s_id, additional, tooltip=""):
         if len(additional) == 0:
-            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s%s)" \
+            return "%s: [%s](https://stackoverflow.com/suggested-edits/%s%s)" \
                    % (msg, s_id, s_id, ' "' + tooltip + '"' if tooltip != "" and tooltip is not None else "")
         else:
-            return "%s: [%s](http://stackoverflow.com/suggested-edits/%s%s) | %s"\
+            return "%s: [%s](https://stackoverflow.com/suggested-edits/%s%s) | %s"\
                    % (msg, s_id, s_id, ' "' + tooltip + '"' if tooltip != "" and tooltip is not None else "",
                       " | ".join(additional))
 
@@ -75,17 +75,17 @@ class EditFetcher:
         return True, items
 
     def get_review_data(self, s_id):
-        req = requests.get("http://stackoverflow.com/suggested-edits/%s"
+        req = requests.get("https://stackoverflow.com/suggested-edits/%s"
                            % (s_id,),
                            allow_redirects=False)
         if 'Location' not in req.headers:
             return None
         rev_loc = req.headers['Location']
-        rev_id = int(rev_loc.split('/')[4])
+        rev_id = int(rev_loc.split('/')[-1])
         rev_data = None
         try:
             rev_data = self.ce_client._br.post(
-                "http://stackoverflow.com/review/next-task/%s" % (rev_id,),
+                "https://stackoverflow.com/review/next-task/%s" % (rev_id,),
                 {"taskTypeId": 1, "fkey": self.se_fkey},
                 None, False).json()["instructions"]
         except requests.HTTPError, h:
