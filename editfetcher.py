@@ -81,7 +81,7 @@ class EditFetcher:
         if 'Location' not in req.headers:
             return None
         rev_loc = req.headers['Location']
-        rev_id = int(rev_loc.split('/')[3])
+        rev_id = int(rev_loc.split('/')[4])
         rev_data = None
         try:
             rev_data = self.ce_client._br.post(
