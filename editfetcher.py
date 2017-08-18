@@ -121,6 +121,9 @@ class EditFetcher:
             if rev_data is None:
                 continue
             soup = BeautifulSoup(rev_data)
+            result_status = soup.find_all("div", class_="review-status")
+            if result_status is not None and len(result_status) > 1 and "Rejected" in result_status[0].text:
+                continue
             result_containers = soup.find_all("div", class_="review-results")
             rejections = 0
             approvals = 0
