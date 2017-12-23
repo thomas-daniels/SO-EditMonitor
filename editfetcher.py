@@ -121,7 +121,7 @@ class EditFetcher:
             if rev_data is None:
                 continue
             soup = BeautifulSoup(rev_data)
-            code_change = check_code_edit(*soup.find_all("td", class_="post-text"))
+            code_change = check_code_edit(*soup.select("div.summary div.body-diffs table.full-html-diff td.post-text"))
             if code_change:
                 self.chat_send_secondary((
                     EditFetcher.format_edit_notification("Code change [Beta]", s_id, [], "")
