@@ -87,7 +87,7 @@ class EditFetcher:
             rev_data = self.ce_client._br.post(
                 "https://stackoverflow.com/review/next-task/%s" % (rev_id,),
                 {"taskTypeId": 1, "fkey": self.se_fkey},
-                None, False).json()["instructions"]
+                None, False).json()["content"]
         except requests.HTTPError, h:
             self.log_error("Recovered from HTTPError while fetching review task: %s"
                            % h.message)
