@@ -1,4 +1,5 @@
 import re
+from bs4 import BeautifulSoup
 
 
 def check_spam(summary):
@@ -10,3 +11,14 @@ def check_spam(summary):
     if re.compile(offensive_regex).search(summary):
         reasons.append("Offensive summary")
     return reasons
+
+
+def check_code_edit(orig, sugg):
+    orig_code = [x.text for x in orig.select("pre")]
+    sugg_code = [x.text for x in sugg.select("pre")]
+    if len(orig_code) != len(sugg_code):
+        return True
+    for i in range(0, len(orig_code)):
+        if orig_code[i] != sugg_code[i]:
+            return True
+    return False

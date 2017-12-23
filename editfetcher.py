@@ -4,7 +4,7 @@ import time
 import Queue
 import actions
 from suggestededit import SuggestedEdit
-from checkspam import check_spam
+from checkspam import check_spam, check_code_edit
 import re
 import sendmsg
 import rejectionreasons
@@ -121,54 +121,61 @@ class EditFetcher:
             if rev_data is None:
                 continue
             soup = BeautifulSoup(rev_data)
-            result_status = soup.find_all("div", class_="review-status")
-            if result_status is not None and len(result_status) > 1 and "Rejected" in result_status[0].text:
-                continue
-            result_containers = soup.find_all("div", class_="review-results")
-            rejections = 0
-            approvals = 0
-            additional = []
-            for rc in result_containers:
-                vote = rc.find("b").getText().lower().strip()
-                is_owner = len(rc.find_all("a", class_="owner")) > 0
-                if is_owner:
-                    additional.append("Approved by OP")
-                if vote == "reject":
-                    rejections += 1
-                elif vote == "edit":
-                    additional.append("Edited by reviewer")
-                elif vote == "approve":
-                    approvals += 1
-            rejection_reasons_soup = soup.find_all("div", class_="rejection-reason")
-            rejection_reasons_comply_to_mode = False
-            reason_types = []
-            for rrs in rejection_reasons_soup:
-                reason = rrs.getText().strip()
-                reason_types.append(rejectionreasons.get_reason_type(reason))
-                if self.restricted_mode.should_report(reason):
-                    rejection_reasons_comply_to_mode = True
-            if rejections >= 1 and self.chat_send_secondary is not None \
-                    and rejection_reasons_comply_to_mode \
-                    and (s_edit.approval_date != -1 or approvals >= 1):
-                count = Counter(reason_types)
-                tooltip = "rejection votes: "
-                for k in count:
-                    tooltip += "{} x {}, ".format(count[k], k)
-                tooltip = tooltip.rstrip().rstrip(',')
-                self.chat_send_secondary(
-                    EditFetcher.format_edit_notification(
-                        "{} 1 rejection vote (mode: {})".format(
-                            "Approved with" if s_edit.approval_date != -1 else "In the queue with 1 approval vote and",
-                            self.restricted_mode.mode
-                        ),
-                        s_id,
-                        additional,
-                        tooltip
+            code_change = check_code_edit(*soup.find_all("td", class_="post-text"))
+            if code_change:
+                self.chat_send_secondary((
+                    EditFetcher.format_edit_notification("Code change [Beta]", s_id, [], "")
+                ))
+                self.reviewed_confirmed.insert(0, s_id)
+            else:
+                result_status = soup.find_all("div", class_="review-status")
+                if result_status is not None and len(result_status) > 1 and "Rejected" in result_status[0].text:
+                    continue
+                result_containers = soup.find_all("div", class_="review-results")
+                rejections = 0
+                approvals = 0
+                additional = []
+                for rc in result_containers:
+                    vote = rc.find("b").getText().lower().strip()
+                    is_owner = len(rc.find_all("a", class_="owner")) > 0
+                    if is_owner:
+                        additional.append("Approved by OP")
+                    if vote == "reject":
+                        rejections += 1
+                    elif vote == "edit":
+                        additional.append("Edited by reviewer")
+                    elif vote == "approve":
+                        approvals += 1
+                rejection_reasons_soup = soup.find_all("div", class_="rejection-reason")
+                rejection_reasons_comply_to_mode = False
+                reason_types = []
+                for rrs in rejection_reasons_soup:
+                    reason = rrs.getText().strip()
+                    reason_types.append(rejectionreasons.get_reason_type(reason))
+                    if self.restricted_mode.should_report(reason):
+                        rejection_reasons_comply_to_mode = True
+                if rejections >= 1 and self.chat_send_secondary is not None \
+                        and rejection_reasons_comply_to_mode \
+                        and (s_edit.approval_date != -1 or approvals >= 1):
+                    count = Counter(reason_types)
+                    tooltip = "rejection votes: "
+                    for k in count:
+                        tooltip += "{} x {}, ".format(count[k], k)
+                    tooltip = tooltip.rstrip().rstrip(',')
+                    self.chat_send_secondary(
+                        EditFetcher.format_edit_notification(
+                            "{} 1 rejection vote (mode: {})".format(
+                                "Approved with" if s_edit.approval_date != -1 else "In the queue with 1 approval vote and",
+                                self.restricted_mode.mode
+                            ),
+                            s_id,
+                            additional,
+                            tooltip
+                        )
                     )
-                )
-                self.reviewed_confirmed.insert(0, s_id)
-            if s_edit.approval_date != -1 and s_id not in self.reviewed_confirmed:
-                self.reviewed_confirmed.insert(0, s_id)
+                    self.reviewed_confirmed.insert(0, s_id)
+                if s_edit.approval_date != -1 and s_id not in self.reviewed_confirmed:
+                    self.reviewed_confirmed.insert(0, s_id)
             processed += 1
             sendmsg.send_to_console_and_ws(
                 "Queue length: " + str(length - processed), True
