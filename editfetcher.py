@@ -82,16 +82,18 @@ class EditFetcher:
             return None
         rev_loc = req.headers['Location']
         rev_id = int(rev_loc.split('/')[-1])
-        rev_data = None
         try:
-            rev_data = self.ce_client._br.post(
+            rev_data_json = self.ce_client._br.post(
                 "https://stackoverflow.com/review/next-task/%s" % (rev_id,),
                 {"taskTypeId": 1, "fkey": self.se_fkey},
-                None, False).json()["content"]
+                None, False).json()
+            rev_data_1 = rev_data_json["instructions"]
+            rev_data_2 = rev_data_json["content"]
+            return rev_data_1, rev_data_2
         except requests.HTTPError, h:
             self.log_error("Recovered from HTTPError while fetching review task: %s"
                            % h.message)
-        return rev_data
+            return None, None
 
     def process_items(self, items):
         for item in items:
@@ -117,11 +119,12 @@ class EditFetcher:
         length = len(self.queue)
         for s_edit in self.queue:
             s_id = s_edit.suggested_edit_id
-            rev_data = self.get_review_data(s_id)
+            rev_data, rev_content = self.get_review_data(s_id)
             if rev_data is None:
                 continue
             soup = BeautifulSoup(rev_data)
-            code_change = check_code_edit(*soup.select("div.summary div.body-diffs table.full-html-diff td.post-text"))
+            content_soup = BeautifulSoup(rev_content)
+            code_change = check_code_edit(*content_soup.select("div.summary div.body-diffs table.full-html-diff td.post-text"))
             if code_change:
                 self.chat_send_secondary((
                     EditFetcher.format_edit_notification("Code change [Beta]", s_id, [], "")
