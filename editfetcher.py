@@ -124,9 +124,11 @@ class EditFetcher:
                 continue
             soup = BeautifulSoup(rev_data)
             content_soup = BeautifulSoup(rev_content)
-            code_change = check_code_edit(
-                *content_soup.find("table", class_="full-html-diff").find_all("td", class_="post-text")
-            )
+            post_text = content_soup.findAll("td", class_="post-text")[0:2]
+            if len(post_text) < 2:
+                code_change = False
+            else:
+                code_change = check_code_edit(*post_text)
             if code_change:
                 self.chat_send_secondary((
                     EditFetcher.format_edit_notification("Code change [Beta]", s_id, [], "")
