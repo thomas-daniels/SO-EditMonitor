@@ -128,7 +128,7 @@ class EditFetcher:
             if len(post_text) < 2:
                 code_change = False
             else:
-                code_change = check_code_edit(*post_text)
+                code_change = check_code_edit(False, *post_text)
             if code_change:
                 self.chat_send_secondary((
                     EditFetcher.format_edit_notification("Code change [Beta]", s_id, [], "")

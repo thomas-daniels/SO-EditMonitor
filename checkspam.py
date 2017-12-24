@@ -13,11 +13,14 @@ def check_spam(summary):
     return reasons
 
 
-def check_code_edit(orig, sugg):
+def check_code_edit(whitespace_is_important, orig, sugg):
     orig_code = [x.text for x in orig.select("pre")]
     sugg_code = [x.text for x in sugg.select("pre")]
     if len(orig_code) != len(sugg_code):
         return True
+    if not whitespace_is_important:
+        orig_code = [re.sub(r"\s", "", x) for x in orig_code]
+        sugg_code = [re.sub(r"\s", "", x) for x in sugg_code]
     for i in range(0, len(orig_code)):
         if orig_code[i] != sugg_code[i]:
             return True
