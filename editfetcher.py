@@ -148,13 +148,13 @@ class EditFetcher:
                     is_owner = len(rc.find_all("a", class_="owner")) > 0
                     if is_owner:
                         additional.append("Approved by OP")
-                    if vote == "reject":
+                    if "reject" in vote:
                         rejections += 1
-                    elif vote == "edit":
+                    elif "edit" in vote:
                         additional.append("Edited by reviewer")
-                    elif vote == "approve":
+                    elif "approve" in vote:
                         approvals += 1
-                rejection_reasons_soup = soup.find_all("div", class_="rejection-reason")
+                rejection_reasons_soup = soup.find_all("div", {"class": ["my8", "mx12", "fc-black-350"]})
                 rejection_reasons_comply_to_mode = False
                 reason_types = []
                 for rrs in rejection_reasons_soup:
